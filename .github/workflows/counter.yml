@@ -1,0 +1,34 @@
+name: Increment Counter
+
+on:
+  schedule:
+    - cron: "*/6 * * * *"
+  workflow_dispatch:
+
+jobs:
+  update-counter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update counter file
+        run: |
+          FILE="counter.txt"
+          if [ ! -f "$FILE" ]; then
+            echo "0" > "$FILE"
+          fi
+          CURRENT=$(cat "$FILE")
+          NEXT=$((CURRENT + 1))
+          echo "$NEXT" > "$FILE"
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add counter.txt
+          git commit -m "Increment counter"
+          git push
